@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Drawing Guessing Game!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-palette"></i> Drawing Guessing Game!</h1>
+                <p class="subtitle">Draw. Challenge Yourself. Have Fun!</p>
+                <div class="header-stats">
+                    <div class="stat">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Games Played: <span id="total-games">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-trophy"></i>
+                        <span>High Score: <span id="high-score">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-fire"></i>
+                        <span>Streak: <span id="streak">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Game Area -->
+        <main class="game-container">
+            <!-- Left Panel - Game Controls & Tools -->
+            <div class="left-panel">
+                <div class="control-card card">
+                    <h2><i class="fas fa-cogs"></i> Game Controls</h2>
+                    
+                    <div class="control-group">
+                        <button id="new-game-btn" class="btn-primary">
+                            <i class="fas fa-plus-circle"></i> New Game
+                        </button>
+                        <button id="practice-btn" class="btn-secondary">
+                            <i class="fas fa-paint-brush"></i> Practice Mode
+                        </button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Game Mode</h3>
+                        <div class="mode-selector">
+                            <button class="mode-btn active" data-mode="classic">
+                                <i class="fas fa-chess-board"></i> Classic
+                            </button>
+                            <button class="mode-btn" data-mode="speed">
+                                <i class="fas fa-bolt"></i> Speed
+                            </button>
+                            <button class="mode-btn" data-mode="challenge">
+                                <i class="fas fa-skull"></i> Challenge
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Drawing Tools</h3>
+                        <div class="tool-presets">
+                            <button class="tool-preset" data-tool="pencil">
+                                <i class="fas fa-pencil-alt"></i> Pencil
+                            </button>
+                            <button class="tool-preset" data-tool="brush">
+                                <i class="fas fa-paint-brush"></i> Brush
+                            </button>
+                            <button class="tool-preset" data-tool="marker">
+                                <i class="fas fa-highlighter"></i> Marker
+                            </button>
+                            <button class="tool-preset" data-tool="spray">
+                                <i class="fas fa-spray-can"></i> Spray
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Canvas Settings</h3>
+                        <div class="canvas-controls">
+                            <div class="canvas-setting">
+                                <label>Background:</label>
+                                <select id="bg-color">
+                                    <option value="#ffffff">White</option>
+                                    <option value="#f8f9fa">Light Gray</option>
+                                    <option value="#f1f3f4">Paper</option>
+                                    <option value="#fff8e1">Cream</option>
+                                    <option value="#e3f2fd">Sky Blue</option>
+                                </select>
+                            </div>
+                            <div class="canvas-setting">
+                                <label>Canvas Size:</label>
+                                <select id="canvas-size">
+                                    <option value="normal">Normal</option>
+                                    <option value="large">Large</option>
+                                    <option value="full">Full Screen</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tools-card card">
+                    <h2><i class="fas fa-tools"></i> Drawing Tools</h2>
+                    
+                    <div class="tool-section">
+                        <h3>Brush Settings</h3>
+                        <div class="brush-controls">
+                            <div class="tool-group">
+                                <label>Size: <span id="brush-size-value">5</span>px</label>
+                                <input type="range" id="brush-size" min="1" max="50" value="5" class="slider">
+                            </div>
+                            
+                            <div class="tool-group">
+                                <label>Opacity: <span id="opacity-value">100</span>%</label>
+                                <input type="range" id="opacity-slider" min="10" max="100" value="100" class="slider">
+                            </div>
+                            
+                            <div class="tool-group">
+                                <label>Blend Mode:</label>
+                                <select id="blend-mode">
+                                    <option value="source-over">Normal</option>
+                                    <option value="multiply">Multiply</option>
+                                    <option value="screen">Screen</option>
+                                    <option value="overlay">Overlay</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-section">
+                        <h3>Colors</h3>
+                        <div class="color-palette">
+                            <div class="color-row">
+                                <button class="color-btn black active" data-color="#000000" data-name="Black"></button>
+                                <button class="color-btn red" data-color="#e74c3c" data-name="Red"></button>
+                                <button class="color-btn blue" data-color="#3498db" data-name="Blue"></button>
+                                <button class="color-btn green" data-color="#2ecc71" data-name="Green"></button>
+                                <button class="color-btn yellow" data-color="#f1c40f" data-name="Yellow"></button>
+                            </div>
+                            <div class="color-row">
+                                <button class="color-btn purple" data-color="#9b59b6" data-name="Purple"></button>
+                                <button class="color-btn orange" data-color="#e67e22" data-name="Orange"></button>
+                                <button class="color-btn pink" data-color="#e91e63" data-name="Pink"></button>
+                                <button class="color-btn brown" data-color="#795548" data-name="Brown"></button>
+                                <button class="color-btn gray" data-color="#95a5a6" data-name="Gray"></button>
+                            </div>
+                        </div>
+                        
+                        <div class="color-picker-container">
+                            <label>Custom Color:</label>
+                            <div class="custom-color">
+                                <input type="color" id="custom-color" value="#000000">
+                                <button id="add-custom-color" class="btn-small">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="current-color-display">
+                            <div class="current-color-box" id="current-color-box"></div>
+                            <span id="current-color-name">Black</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-section">
+                        <h3>Shapes & Tools</h3>
+                        <div class="shape-tools">
+                            <button class="shape-btn" data-shape="line">
+                                <i class="fas fa-slash"></i> Line
+                            </button>
+                            <button class="shape-btn" data-shape="rectangle">
+                                <i class="fas fa-square"></i> Rectangle
+                            </button>
+                            <button class="shape-btn" data-shape="circle">
+                                <i class="fas fa-circle"></i> Circle
+                            </button>
+                            <button class="shape-btn" data-shape="triangle">
+                                <i class="fas fa-play"></i> Triangle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel - Drawing & Game -->
+            <div class="center-panel">
+                <div class="game-header card">
+                    <div class="game-info">
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Time: <span id="timer">60</span>s</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-star"></i>
+                            <span>Score: <span id="score">0</span></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Round: <span id="round">1</span>/5</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-bolt"></i>
+                            <span>Multiplier: <span id="multiplier">1.0x</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="word-display">
+                        <div class="word-label">
+                            <i class="fas fa-puzzle-piece"></i> Draw This:
+                        </div>
+                        <div class="word-container">
+                            <h2 id="current-word">Click New Game to Start</h2>
+                            <div class="word-hint">
+                                <span id="word-hint">Hint: </span>
+                                <button id="show-hint" class="btn-small">
+                                    <i class="fas fa-question-circle"></i> More Hints
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drawing-area card">
+                    <div class="canvas-container">
+                        <canvas id="drawing-canvas"></canvas>
+                        <div class="canvas-overlay" id="canvas-overlay">
+                            <div class="overlay-content">
+                                <div class="overlay-icon">
+                                    <i class="fas fa-paint-brush"></i>
+                                </div>
+                                <h3>Ready to Draw!</h3>
+                                <p>Click "New Game" to start your drawing challenge</p>
+                                <div class="overlay-tip">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span>Tip: Use different brush sizes for details!</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="canvas-grid" id="canvas-grid"></div>
+                    </div>
+                    
+                    <div class="drawing-controls">
+                        <div class="control-left">
+                            <button id="clear-btn" class="btn-control">
+                                <i class="fas fa-trash-alt"></i> Clear
+                            </button>
+                            <button id="undo-btn" class="btn-control">
+                                <i class="fas fa-undo"></i> Undo
+                            </button>
+                            <button id="redo-btn" class="btn-control">
+                                <i class="fas fa-redo"></i> Redo
+                            </button>
+                            <button id="fill-btn" class="btn-control">
+                                <i class="fas fa-fill-drip"></i> Fill
+                            </button>
+                            <button id="eraser-btn" class="btn-control">
+                                <i class="fas fa-eraser"></i> Eraser
+                            </button>
+                        </div>
+                        
+                        <div class="control-right">
+                            <button id="save-btn" class="btn-control">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button id="share-btn" class="btn-control">
+                                <i class="fas fa-share-alt"></i> Share
+                            </button>
+                            <button id="zoom-in" class="btn-control">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button id="zoom-out" class="btn-control">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button id="grid-toggle" class="btn-control">
+                                <i class="fas fa-th"></i> Grid
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-feedback card">
+                    <div class="feedback-header">
+                        <h3><i class="fas fa-chart-line"></i> Performance</h3>
+                        <button id="toggle-feedback" class="btn-small">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="feedback-content" id="feedback-content">
+                        <div class="performance-metrics">
+                            <div class="metric">
+                                <div class="metric-label">Accuracy</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="accuracy-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="metric-value" id="accuracy-value">0%</div>
+                            </div>
+                            
+                            <div class="metric">
+                                <div class="metric-label">Speed</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="speed-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="metric-value" id="speed-value">0%</div>
+                            </div>
+                            
+                            <div class="metric">
+                                <div class="metric-label">Creativity</div>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="creativity-bar" style="width: 0%"></div>
+                                </div>
+                                <div class="metric-value" id="creativity-value">0%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="feedback-tips" id="feedback-tips">
+                            <div class="tip">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Start with rough shapes, then add details</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Progress & Gallery -->
+            <div class="right-panel">
+                <div class="progress-card card">
+                    <h2><i class="fas fa-tasks"></i> Game Progress</h2>
+                    
+                    <div class="progress-stats">
+                        <div class="progress-item">
+                            <div class="progress-icon completed">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <div class="progress-title">Round Complete</div>
+                                <div class="progress-subtitle" id="rounds-complete">0/5 rounds</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item">
+                            <div class="progress-icon time">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
+                            <div class="progress-text">
+                                <div class="progress-title">Time Remaining</div>
+                                <div class="progress-subtitle" id="time-remaining">60 seconds</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-chart">
+                        <h3>Score Progress</h3>
+                        <div class="chart-container">
+                            <canvas id="score-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="achievement-progress">
+                        <h3>Achievements Progress</h3>
+                        <div class="achievement-item">
+                            <div class="achievement-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="achievement-details">
+                                <div class="achievement-title">Quick Draw</div>
+                                <div class="achievement-progress-bar">
+                                    <div class="achievement-fill" style="width: 0%"></div>
+                                </div>
+                                <div class="achievement-subtitle">0/10 drawings in under 30s</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-card card">
+                    <h2><i class="fas fa-images"></i> Drawing Gallery</h2>
+                    
+                    <div class="gallery-controls">
+                        <button id="view-gallery" class="btn-small">
+                            <i class="fas fa-th-large"></i> View All
+                        </button>
+                        <button id="clear-gallery" class="btn-small">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                    
+                    <div class="gallery-grid" id="gallery-grid">
+                        <div class="gallery-empty">
+                            <i class="fas fa-image"></i>
+                            <p>No drawings yet</p>
+                            <small>Your drawings will appear here</small>
+                        </div>
+                    </div>
+                    
+                    <div class="gallery-info">
+                        <div class="info-stat">
+                            <i class="fas fa-database"></i>
+                            <span>Storage: <span id="storage-used">0</span>/50 drawings</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-card card">
+                    <h2><i class="fas fa-history"></i> Game History</h2>
+                    
+                    <div class="history-list" id="history-list">
+                        <div class="history-empty">
+                            <i class="fas fa-clock"></i>
+                            <p>No game history</p>
+                            <small>Your games will appear here</small>
+                        </div>
+                    </div>
+                    
+                    <div class="history-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Best Score:</span>
+                            <span class="summary-value" id="best-score">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Avg. Accuracy:</span>
+                            <span class="summary-value" id="avg-accuracy">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>🎨 <strong>Drawing Guessing Game!</strong> - Test your drawing skills and creativity</p>
+                    <p class="game-tip"><i class="fas fa-lightbulb"></i> Tip: Use reference images from the hint system!</p>
+                </div>
+                <div class="footer-right">
+                    <div class="footer-stats">
+                        <span><i class="fas fa-sync-alt"></i> Auto-save: <span id="last-save">Just now</span></span>
+                        <span><i class="fas fa-wifi"></i> Status: <span class="status-online">Offline Ready</span></span>
+                    </div>
+                    <p class="signature">by Macklin</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="game-complete-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-trophy"></i> Game Complete!</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="result-summary">
+                    <div class="result-item">
+                        <div class="result-icon score">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="result-details">
+                            <div class="result-label">Final Score</div>
+                            <div class="result-value" id="final-score">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-icon accuracy">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <div class="result-details">
+                            <div class="result-label">Accuracy</div>
+                            <div class="result-value" id="final-accuracy">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-icon time">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="result-details">
+                            <div class="result-label">Time Used</div>
+                            <div class="result-value" id="final-time">0s</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-actions">
+                    <button id="play-again" class="btn-primary">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                    <button id="save-drawing" class="btn-secondary">
+                        <i class="fas fa-save"></i> Save Drawing
+                    </button>
+                    <button id="share-result" class="btn-secondary">
+                        <i class="fas fa-share"></i> Share Result
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="draw-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3" preload="auto"></audio>
+    <audio id="click-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" preload="auto"></audio>
+    <audio id="success-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+    <audio id="complete-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-trumpet-2018.mp3" preload="auto"></audio>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
