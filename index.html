@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Drawing Guessing Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    
+    <!-- Debug CSS -->
+    <style>
+        #new-game-btn, #practice-btn, #clear-btn {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+        }
+        
+        #canvas-overlay {
+            pointer-events: none !important;
+        }
+        
+        #canvas-overlay * {
+            pointer-events: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-palette"></i> Drawing Guessing Game</h1>
+                <p class="subtitle">Draw the word and challenge yourself!</p>
+                <div class="header-stats">
+                    <div class="stat">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Games: <span id="total-games">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-trophy"></i>
+                        <span>Best: <span id="high-score">0</span></span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-fire"></i>
+                        <span>Streak: <span id="streak">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Game Area -->
+        <main class="game-container">
+            <!-- Left Panel - Controls -->
+            <div class="left-panel">
+                <div class="control-card card">
+                    <h2><i class="fas fa-cogs"></i> Controls</h2>
+                    
+                    <div class="control-group">
+                        <!-- TOMBOL UTAMA YANG SUDAH DIFIX DI JS -->
+                        <button id="new-game-btn" class="btn-primary">
+                            <i class="fas fa-play"></i> New Game
+                        </button>
+                        <button id="practice-btn" class="btn-secondary">
+                            <i class="fas fa-paint-brush"></i> Practice
+                        </button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Game Mode</h3>
+                        <div class="mode-buttons">
+                            <button class="mode-btn active" data-mode="classic">
+                                <i class="fas fa-chess-board"></i> Classic
+                            </button>
+                            <button class="mode-btn" data-mode="speed">
+                                <i class="fas fa-bolt"></i> Speed
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>Drawing Tools</h3>
+                        <div class="tool-buttons">
+                            <button class="tool-btn active" data-tool="brush">
+                                <i class="fas fa-paint-brush"></i> Brush
+                            </button>
+                            <button class="tool-btn" data-tool="pencil">
+                                <i class="fas fa-pencil-alt"></i> Pencil
+                            </button>
+                            <button class="tool-btn" data-tool="marker">
+                                <i class="fas fa-highlighter"></i> Marker
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tools-card card">
+                    <h2><i class="fas fa-tools"></i> Tools</h2>
+                    
+                    <div class="tool-section">
+                        <h3>Brush Size</h3>
+                        <div class="brush-control">
+                            <input type="range" id="brush-size" min="1" max="30" value="5">
+                            <span id="brush-size-value">5px</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-section">
+                        <h3>Colors</h3>
+                        <div class="color-buttons">
+                            <button class="color-btn black active" data-color="#000000"></button>
+                            <button class="color-btn red" data-color="#e74c3c"></button>
+                            <button class="color-btn blue" data-color="#3498db"></button>
+                            <button class="color-btn green" data-color="#2ecc71"></button>
+                            <button class="color-btn yellow" data-color="#f1c40f"></button>
+                            <button class="color-btn purple" data-color="#9b59b6"></button>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-section">
+                        <h3>Actions</h3>
+                        <div class="action-buttons">
+                            <button id="clear-btn" class="action-btn">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                            <button id="undo-btn" class="action-btn">
+                                <i class="fas fa-undo"></i> Undo
+                            </button>
+                            <button id="eraser-btn" class="action-btn">
+                                <i class="fas fa-eraser"></i> Eraser
+                            </button>
+                            <button id="save-btn" class="action-btn">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel - Drawing -->
+            <div class="center-panel">
+                <div class="game-info card">
+                    <div class="info-row">
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Time: <span id="timer">60</span>s</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-star"></i>
+                            <span>Score: <span id="score">0</span></span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Round: <span id="round">1</span>/5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="word-display">
+                        <div class="word-label">
+                            <i class="fas fa-puzzle-piece"></i> Draw This:
+                        </div>
+                        <!-- ID INI HARUS SAMA DENGAN DI JS -->
+                        <h2 id="current-word">Click New Game to Start</h2>
+                        <button id="show-hint" class="hint-btn">
+                            <i class="fas fa-lightbulb"></i> Get Hint
+                        </button>
+                    </div>
+                </div>
+
+                <div class="drawing-area card">
+                    <div class="canvas-container">
+                        <!-- CANVAS ID HARUS SAMA DENGAN DI JS -->
+                        <canvas id="drawing-canvas"></canvas>
+                        <div class="canvas-overlay" id="canvas-overlay">
+                            <div class="overlay-content">
+                                <i class="fas fa-paint-brush"></i>
+                                <h3>Ready to Draw!</h3>
+                                <p>Start a new game to begin drawing</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="canvas-controls">
+                        <button id="grid-toggle" class="control-btn">
+                            <i class="fas fa-th"></i> Grid
+                        </button>
+                        <button id="zoom-in" class="control-btn">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button id="zoom-out" class="control-btn">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="history-card card">
+                    <h2><i class="fas fa-history"></i> Recent Games</h2>
+                    <div class="history-list" id="history-list">
+                        <div class="history-empty">
+                            <i class="fas fa-clock"></i>
+                            <p>No games yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Progress -->
+            <div class="right-panel">
+                <div class="progress-card card">
+                    <h2><i class="fas fa-chart-line"></i> Progress</h2>
+                    
+                    <div class="progress-item">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">Accuracy: <span id="accuracy">0%</span></div>
+                    </div>
+                    
+                    <div class="progress-item">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">Speed: <span id="speed">0%</span></div>
+                    </div>
+                    
+                    <div class="achievements">
+                        <h3>Achievements</h3>
+                        <div class="achievement">
+                            <i class="fas fa-star"></i>
+                            <span>First Drawing</span>
+                        </div>
+                        <div class="achievement">
+                            <i class="fas fa-star"></i>
+                            <span>Quick Artist</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-card card">
+                    <h2><i class="fas fa-images"></i> Gallery</h2>
+                    <div class="gallery-grid" id="gallery-grid">
+                        <div class="gallery-empty">
+                            <i class="fas fa-image"></i>
+                            <p>No drawings saved</p>
+                        </div>
+                    </div>
+                    <button id="clear-gallery" class="gallery-btn">
+                        <i class="fas fa-trash"></i> Clear Gallery
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>🎨 Drawing Guessing Game - Offline Edition</p>
+                <p class="signature">by Macklin</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Game Complete Modal -->
+    <div class="modal" id="game-complete-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-trophy"></i> Game Complete!</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="result-item">
+                    <h3>Final Score</h3>
+                    <div class="score-display" id="final-score">0</div>
+                </div>
+                <div class="result-item">
+                    <h3>Word Drawn</h3>
+                    <div class="word-result" id="final-word">-</div>
+                </div>
+                <div class="modal-buttons">
+                    <button id="play-again" class="btn-primary">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                    <button id="save-result" class="btn-secondary">
+                        <i class="fas fa-save"></i> Save Drawing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio - ID HARUS SAMA DENGAN DI JS -->
+    <audio id="click-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3"></audio>
+    <audio id="draw-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3"></audio>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+    <!-- SCRIPT UTAMA - HARUS DIBAWAH SEMUA ELEMENT -->
+    <script>
+        // === GAME CLASS YANG SUDAH DIPERBAIKI ===
+        class DrawingGame {
+            constructor() {
+                // Inisialisasi state game
+                this.gameState = 'idle';
+                this.score = 0;
+                this.timeLeft = 60;
+                this.timer = null;
+                this.isDrawing = false;
+                this.currentColor = '#000000';
+                this.brushSize = 5;
+                
+                // Word bank
+                this.words = ['Cat', 'House', 'Tree', 'Car', 'Sun', 'Flower', 'Dog', 'Mountain'];
+                
+                console.log('🎮 Game Class created');
+            }
+
+            init() {
+                console.log('🔧 Initializing game...');
+                
+                // Setup canvas
+                this.setupCanvas();
+                
+                // Setup event listeners
+                this.setupEventListeners();
+                
+                // Setup toastr
+                this.setupToastr();
+                
+                console.log('✅ Game initialized successfully!');
+                
+                // Welcome message
+                setTimeout(() => {
+                    toastr.info('Click New Game to start drawing!', 'Welcome!');
+                }, 1000);
+            }
+
+            setupCanvas() {
+                console.log('🖼️ Setting up canvas...');
+                this.canvas = document.getElementById('drawing-canvas');
+                if (!this.canvas) {
+                    console.error('❌ Canvas element not found!');
+                    return;
+                }
+                
+                this.ctx = this.canvas.getContext('2d');
+                
+                // Set canvas size
+                const container = this.canvas.parentElement;
+                this.canvas.width = container.clientWidth;
+                this.canvas.height = 500;
+                
+                // Clear canvas
+                this.clearCanvas();
+                
+                // Set drawing style
+                this.ctx.lineWidth = this.brushSize;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                this.ctx.strokeStyle = this.currentColor;
+                
+                console.log('✅ Canvas setup complete');
+            }
+
+            setupEventListeners() {
+                console.log('🔗 Setting up event listeners...');
+                
+                // ====== CANVAS EVENTS ======
+                this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+                this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+                this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+                
+                // ====== GAME CONTROL BUTTONS ======
+                
+                // 1. NEW GAME BUTTON - YANG SUDAH DIFIX
+                const newGameBtn = document.getElementById('new-game-btn');
+                if (newGameBtn) {
+                    console.log('✅ Found new-game-btn element');
+                    newGameBtn.addEventListener('click', (e) => {
+                        console.log('🎮 New Game button clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.startNewGame();
+                    });
+                } else {
+                    console.error('❌ new-game-btn element NOT FOUND!');
+                }
+                
+                // 2. PRACTICE MODE BUTTON
+                const practiceBtn = document.getElementById('practice-btn');
+                if (practiceBtn) {
+                    practiceBtn.addEventListener('click', (e) => {
+                        console.log('🎨 Practice Mode button clicked!');
+                        e.preventDefault();
+                        this.startPractice();
+                    });
+                }
+                
+                // 3. CLEAR BUTTON
+                const clearBtn = document.getElementById('clear-btn');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', (e) => {
+                        console.log('🧹 Clear button clicked!');
+                        e.preventDefault();
+                        this.clearCanvas();
+                    });
+                }
+                
+                // ====== COLOR BUTTONS ======
+                document.querySelectorAll('.color-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const color = e.target.getAttribute('data-color');
+                        if (color) {
+                            this.currentColor = color;
+                            this.ctx.strokeStyle = color;
+                            
+                            // Update active state
+                            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                            e.target.classList.add('active');
+                        }
+                    });
+                });
+                
+                // ====== BRUSH SIZE ======
+                const brushSize = document.getElementById('brush-size');
+                if (brushSize) {
+                    brushSize.addEventListener('input', (e) => {
+                        this.brushSize = e.target.value;
+                        this.ctx.lineWidth = this.brushSize;
+                        document.getElementById('brush-size-value').textContent = this.brushSize + 'px';
+                    });
+                }
+                
+                // ====== SAVE BUTTON ======
+                const saveBtn = document.getElementById('save-btn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.saveDrawing();
+                    });
+                }
+                
+                // ====== HINT BUTTON ======
+                const showHint = document.getElementById('show-hint');
+                if (showHint) {
+                    showHint.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.showHint();
+                    });
+                }
+                
+                // ====== PLAY AGAIN BUTTON ======
+                const playAgain = document.getElementById('play-again');
+                if (playAgain) {
+                    playAgain.addEventListener('click', (e) => {
+                                                e.preventDefault();
+                        document.getElementById('game-complete-modal').classList.remove('active');
+                        this.startNewGame();
+                    });
+                }
+                
+                // ====== MODAL CLOSE ======
+                const modalClose = document.querySelector('.modal-close');
+                if (modalClose) {
+                    modalClose.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.getElementById('game-complete-modal').classList.remove('active');
+                    });
+                }
+                
+                // ====== TOOL BUTTONS ======
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const tool = e.target.getAttribute('data-tool');
+                        if (tool) {
+                            // Update active state
+                            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                            e.target.classList.add('active');
+                            toastr.info(`Switched to ${tool} tool`);
+                        }
+                    });
+                });
+                
+                // ====== MODE BUTTONS ======
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const mode = e.target.getAttribute('data-mode');
+                        if (mode) {
+                            // Update active state
+                            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                            e.target.classList.add('active');
+                            this.gameMode = mode;
+                            toastr.info(`Game mode: ${mode}`);
+                        }
+                    });
+                });
+                
+                // ====== UNDO BUTTON ======
+                const undoBtn = document.getElementById('undo-btn');
+                if (undoBtn) {
+                    undoBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toastr.info('Undo action');
+                        // Implement undo logic here
+                    });
+                }
+                
+                // ====== REDO BUTTON ======
+                const redoBtn = document.getElementById('redo-btn');
+                if (redoBtn) {
+                    redoBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toastr.info('Redo action');
+                        // Implement redo logic here
+                    });
+                }
+                
+                // ====== ERASER BUTTON ======
+                const eraserBtn = document.getElementById('eraser-btn');
+                if (eraserBtn) {
+                    eraserBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toastr.info('Eraser activated');
+                        // Implement eraser logic here
+                    });
+                }
+                
+                // ====== GRID TOGGLE ======
+                const gridToggle = document.getElementById('grid-toggle');
+                if (gridToggle) {
+                    gridToggle.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toastr.info('Grid toggled');
+                        // Implement grid toggle logic here
+                    });
+                }
+                
+                // ====== ZOOM BUTTONS ======
+                const zoomIn = document.getElementById('zoom-in');
+                const zoomOut = document.getElementById('zoom-out');
+                
+                if (zoomIn) {
+                    zoomIn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toastr.info('Zoom in');
+                        // Implement zoom in logic here
+                    });
+                }
+                
+                if (zoomOut) {
+                    zoomOut.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toastr.info('Zoom out');
+                        // Implement zoom out logic here
+                    });
+                }
+                
+                // ====== CLEAR GALLERY ======
+                const clearGallery = document.getElementById('clear-gallery');
+                if (clearGallery) {
+                    clearGallery.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (confirm('Clear all saved drawings?')) {
+                            toastr.success('Gallery cleared');
+                            // Implement clear gallery logic here
+                        }
+                    });
+                }
+                
+                console.log('✅ All event listeners setup complete');
+            }
+
+            // ====== GAME METHODS ======
+            
+            startNewGame() {
+                console.log('🚀 Starting new game...');
+                
+                // Update game state
+                this.gameState = 'drawing';
+                this.score = 0;
+                this.timeLeft = 60;
+                
+                // Clear timer if exists
+                if (this.timer) clearInterval(this.timer);
+                
+                // Get random word
+                const randomWord = this.words[Math.floor(Math.random() * this.words.length)];
+                this.currentWord = randomWord;
+                
+                // Update UI - PASTIKAN ID INI SAMA DENGAN HTML
+                const currentWordElement = document.getElementById('current-word');
+                const scoreElement = document.getElementById('score');
+                const timerElement = document.getElementById('timer');
+                
+                if (currentWordElement) currentWordElement.textContent = randomWord;
+                if (scoreElement) scoreElement.textContent = '0';
+                if (timerElement) timerElement.textContent = '60';
+                
+                // Hide overlay
+                const overlay = document.getElementById('canvas-overlay');
+                if (overlay) overlay.classList.add('hidden');
+                
+                // Clear canvas
+                this.clearCanvas();
+                
+                // Start timer
+                this.startTimer();
+                
+                // Show success message
+                toastr.success(`Draw: "${randomWord}"`, 'Game Started!');
+                
+                // Play sound
+                this.playSound('click-sound');
+                
+                // Update stats
+                const totalGames = document.getElementById('total-games');
+                if (totalGames) {
+                    totalGames.textContent = parseInt(totalGames.textContent) + 1;
+                }
+                
+                // Reset timer warning class
+                if (timerElement) timerElement.classList.remove('warning');
+            }
+
+            startPractice() {
+                console.log('🎨 Starting practice mode...');
+                
+                this.gameState = 'drawing';
+                this.currentWord = 'Practice Mode';
+                
+                // Update UI
+                const currentWordElement = document.getElementById('current-word');
+                const timerElement = document.getElementById('timer');
+                
+                if (currentWordElement) currentWordElement.textContent = 'Draw Anything!';
+                
+                // Hide overlay
+                const overlay = document.getElementById('canvas-overlay');
+                if (overlay) overlay.classList.add('hidden');
+                
+                // No timer in practice
+                clearInterval(this.timer);
+                if (timerElement) {
+                    timerElement.textContent = '∞';
+                    timerElement.classList.remove('warning');
+                }
+                
+                // Clear canvas
+                this.clearCanvas();
+                
+                toastr.info('Practice mode - draw anything!');
+            }
+
+            clearCanvas() {
+                if (!this.ctx) return;
+                
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Reset to default drawing settings
+                this.ctx.lineWidth = this.brushSize;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                this.ctx.strokeStyle = this.currentColor;
+                
+                toastr.info('Canvas cleared');
+            }
+
+            startDrawing(e) {
+                if (this.gameState !== 'drawing') return;
+                
+                this.isDrawing = true;
+                const rect = this.canvas.getBoundingClientRect();
+                this.lastX = e.clientX - rect.left;
+                this.lastY = e.clientY - rect.top;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.lastX, this.lastY);
+                
+                // Play sound
+                this.playSound('draw-sound');
+            }
+
+            draw(e) {
+                if (!this.isDrawing || !this.ctx) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.ctx.lineTo(x, y);
+                this.ctx.stroke();
+                
+                this.lastX = x;
+                this.lastY = y;
+            }
+
+            stopDrawing() {
+                this.isDrawing = false;
+                if (this.ctx) {
+                    this.ctx.closePath();
+                }
+            }
+
+            startTimer() {
+                const timerElement = document.getElementById('timer');
+                if (!timerElement) return;
+                
+                // Reset time
+                this.timeLeft = 60;
+                timerElement.textContent = this.timeLeft;
+                
+                // Clear any existing timer
+                if (this.timer) clearInterval(this.timer);
+                
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    timerElement.textContent = this.timeLeft;
+                    
+                    // Add warning class when time is low
+                    if (this.timeLeft <= 10) {
+                        timerElement.classList.add('warning');
+                        
+                        // Play sound for last 5 seconds
+                        if (this.timeLeft <= 5) {
+                            this.playSound('draw-sound');
+                        }
+                    }
+                    
+                    // End game when time runs out
+                    if (this.timeLeft <= 0) {
+                        clearInterval(this.timer);
+                        this.endGame();
+                    }
+                }, 1000);
+            }
+
+            endGame() {
+                this.gameState = 'idle';
+                
+                // Calculate score (random for now)
+                this.score = Math.floor(Math.random() * 500) + 100;
+                
+                // Update final score display
+                const finalScoreElement = document.getElementById('final-score');
+                const finalWordElement = document.getElementById('final-word');
+                
+                if (finalScoreElement) finalScoreElement.textContent = this.score;
+                if (finalWordElement) finalWordElement.textContent = this.currentWord;
+                
+                // Update current score display
+                const scoreElement = document.getElementById('score');
+                if (scoreElement) scoreElement.textContent = this.score;
+                
+                // Show modal
+                const modal = document.getElementById('game-complete-modal');
+                if (modal) modal.classList.add('active');
+                
+                // Update high score
+                const highScoreElement = document.getElementById('high-score');
+                if (highScoreElement) {
+                    const currentHighScore = parseInt(highScoreElement.textContent) || 0;
+                    if (this.score > currentHighScore) {
+                        highScoreElement.textContent = this.score;
+                        toastr.success(`New High Score: ${this.score}!`, 'Congratulations!');
+                    }
+                }
+                
+                // Update streak
+                const streakElement = document.getElementById('streak');
+                if (streakElement && this.score > 200) {
+                    const currentStreak = parseInt(streakElement.textContent) || 0;
+                    streakElement.textContent = currentStreak + 1;
+                }
+                
+                // Play completion sound
+                this.playSound('click-sound');
+            }
+
+            saveDrawing() {
+                if (!this.canvas) return;
+                
+                try {
+                    const link = document.createElement('a');
+                    link.download = `drawing-${Date.now()}.png`;
+                    link.href = this.canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    toastr.success('Drawing saved as PNG!');
+                    
+                    // Add to gallery (simulated)
+                    const galleryGrid = document.getElementById('gallery-grid');
+                    if (galleryGrid) {
+                        const galleryEmpty = galleryGrid.querySelector('.gallery-empty');
+                        if (galleryEmpty) {
+                            galleryEmpty.style.display = 'none';
+                        }
+                        
+                        // Create thumbnail (simulated)
+                        const img = document.createElement('img');
+                        img.src = this.canvas.toDataURL('image/png');
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        
+                        const galleryItem = document.createElement('div');
+                        galleryItem.style.width = '80px';
+                        galleryItem.style.height = '80px';
+                        galleryItem.style.borderRadius = '8px';
+                        galleryItem.style.overflow = 'hidden';
+                        galleryItem.style.cursor = 'pointer';
+                        galleryItem.appendChild(img);
+                        
+                        galleryGrid.appendChild(galleryItem);
+                    }
+                } catch (error) {
+                    console.error('Error saving drawing:', error);
+                    toastr.error('Failed to save drawing');
+                }
+            }
+
+            showHint() {
+                const hints = [
+                    'Start with basic shapes',
+                    'Use colors to make it clear',
+                    'Add details last',
+                    'Think about the main features',
+                    'Draw from simple to complex',
+                    'Use reference if needed'
+                ];
+                
+                const hint = hints[Math.floor(Math.random() * hints.length)];
+                toastr.info(`💡 Hint: ${hint}`);
+                
+                // Update hint display
+                const wordHint = document.getElementById('word-hint');
+                if (wordHint) {
+                    wordHint.textContent = `Hint: ${hint}`;
+                }
+            }
+
+            playSound(soundId) {
+                try {
+                    const sound = document.getElementById(soundId);
+                    if (sound) {
+                        sound.currentTime = 0;
+                        sound.play().catch(e => {
+                            // Ignore autoplay errors
+                            console.log('Sound play prevented:', e);
+                        });
+                    }
+                } catch (error) {
+                    console.log('Sound error:', error);
+                }
+            }
+
+            setupToastr() {
+                if (typeof toastr !== 'undefined') {
+                    toastr.options = {
+                        positionClass: 'toast-top-right',
+                        timeOut: 3000,
+                        closeButton: true,
+                        progressBar: true,
+                        newestOnTop: true
+                    };
+                }
+            }
+        }
+
+        // ====== INITIALIZE GAME ======
+        window.addEventListener('load', () => {
+            console.log('📄 Page loaded, starting game...');
+            
+            // Setup toastr first
+            if (typeof toastr !== 'undefined') {
+                toastr.options = {
+                    positionClass: 'toast-top-right',
+                    timeOut: 3000,
+                    closeButton: true
+                };
+            }
+            
+            // Start the game
+            try {
+                window.game = new DrawingGame();
+                window.game.init();
+                console.log('🎉 Game loaded successfully!');
+                console.log('👉 Click "New Game" to start drawing!');
+                
+                // Add manual test button in console
+                console.log('%c🔧 DEBUG: window.game.startNewGame() available', 'color: #4CAF50; font-weight: bold');
+                
+            } catch (error) {
+                console.error('❌ Error loading game:', error);
+                toastr.error('Failed to load game', 'Error');
+            }
+        });
+
+        // Fallback initialization
+        if (document.readyState === 'complete') {
+            setTimeout(() => {
+                if (!window.game) {
+                    console.log('🔄 Late initialization...');
+                    window.game = new DrawingGame();
+                    window.game.init();
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
